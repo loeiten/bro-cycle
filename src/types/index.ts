@@ -85,6 +85,8 @@ export interface InsightItem {
   title: string;
   content: string;
   phase?: CyclePhase;
+  emoji?: string;
+  shortTip?: string;
 }
 
 export interface AppSettings {
@@ -92,6 +94,7 @@ export interface AppSettings {
   notifications_enabled: boolean;
   luteal_warning_days_before: number;
   pms_warning_days_before: number;
+  menstrual_warning_days_before: number;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -99,4 +102,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   notifications_enabled: true,
   luteal_warning_days_before: 2,
   pms_warning_days_before: 2,
+  menstrual_warning_days_before: 2,
 };

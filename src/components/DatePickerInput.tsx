@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { formatDate } from "../utils/dateUtils";
-import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS } from "../constants/theme";
+import {
+  COLORS,
+  FONT_SIZES,
+  SPACING,
+  BORDER_RADIUS,
+  SHADOWS,
+} from "../constants/theme";
 
 interface Props {
   value: Date;
@@ -32,7 +38,7 @@ export function DatePickerInput({
       <Text style={styles.label}>{label}</Text>
       <View style={styles.pickerRow}>
         <TouchableOpacity
-          style={styles.arrowButton}
+          style={[styles.arrowButton, SHADOWS.sm]}
           onPress={() => handleDayChange(-1)}
           accessibilityLabel="Previous day"
         >
@@ -46,7 +52,7 @@ export function DatePickerInput({
           <Text style={styles.dateText}>{formatDate(value)}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.arrowButton}
+          style={[styles.arrowButton, SHADOWS.sm]}
           onPress={() => handleDayChange(1)}
           accessibilityLabel="Next day"
         >
@@ -73,21 +79,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   arrowButton: {
-    padding: SPACING.md,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.surfaceElevated,
+    alignItems: "center",
+    justifyContent: "center",
   },
   arrow: {
     fontSize: FONT_SIZES.lg,
-    color: COLORS.text,
+    color: COLORS.accent,
   },
   dateDisplay: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.surfaceElevated,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderLight,
     minWidth: 160,
     alignItems: "center",
+    marginHorizontal: SPACING.sm,
   },
   dateText: {
     fontSize: FONT_SIZES.lg,

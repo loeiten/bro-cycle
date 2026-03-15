@@ -37,6 +37,10 @@ Three-layer pattern: **Screen -> Service -> Repository -> expo-sqlite**
 Uses `pre-commit` Python framework. Run `pre-commit install` to set up hooks.
 Order: pre-commit-hooks -> markdownlint -> gitleaks -> prettier -> eslint -> tsc -> jest
 
+## Git
+
+Do not use `git stash`. If you need to check the state before changes, use a worktree or a separate branch instead.
+
 ## Security
 
 Never ignore security warnings (e.g. Dependabot alerts, `npm audit` vulnerabilities). Always fix them immediately, even if they are low severity or in transitive/dev dependencies.

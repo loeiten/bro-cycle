@@ -34,20 +34,24 @@ describe("database", () => {
     expect(db1).toBe(db2);
   });
 
-  it("runs migration version 1 when at version 0", async () => {
+  it("runs migration version 1 and 2 when at version 0", async () => {
     mockGetFirstAsync.mockResolvedValueOnce({ version: 0 });
     await getDatabase();
-    // Should have called execAsync for the migration SQL
-    expect(mockExecAsync).toHaveBeenCalledTimes(2); // schema_version + migration 1
-    // Should have inserted version record
+    // Should have called execAsync for schema_version + migration 1 + migration 2
+    expect(mockExecAsync).toHaveBeenCalledTimes(3);
+    // Should have inserted version records
     expect(mockRunAsync).toHaveBeenCalledWith(
       "INSERT INTO schema_version (version) VALUES (?)",
       [1],
     );
+    expect(mockRunAsync).toHaveBeenCalledWith(
+      "INSERT INTO schema_version (version) VALUES (?)",
+      [2],
+    );
   });
 
   it("skips migrations when already at latest version", async () => {
-    mockGetFirstAsync.mockResolvedValueOnce({ version: 1 });
+    mockGetFirstAsync.mockResolvedValueOnce({ version: 2 });
     await getDatabase();
     // Only schema_version table creation, no migration
     expect(mockExecAsync).toHaveBeenCalledTimes(1);

@@ -44,6 +44,11 @@ export async function getAllSettings(): Promise<AppSettings> {
         String(DEFAULT_SETTINGS.pms_warning_days_before),
       10,
     ),
+    menstrual_warning_days_before: parseInt(
+      map.get("menstrual_warning_days_before") ??
+        String(DEFAULT_SETTINGS.menstrual_warning_days_before),
+      10,
+    ),
   };
 }
 
@@ -63,5 +68,9 @@ export async function saveAllSettings(settings: AppSettings): Promise<void> {
   await setSetting(
     "pms_warning_days_before",
     String(settings.pms_warning_days_before),
+  );
+  await setSetting(
+    "menstrual_warning_days_before",
+    String(settings.menstrual_warning_days_before),
   );
 }

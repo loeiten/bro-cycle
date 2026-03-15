@@ -24,13 +24,13 @@ describe("settingsRepository", () => {
     jest.clearAllMocks();
     resetDatabase();
     (SQLite.openDatabaseAsync as jest.Mock).mockResolvedValue(mockDb);
-    mockGetFirstAsync.mockResolvedValue({ version: 1 });
+    mockGetFirstAsync.mockResolvedValue({ version: 2 });
   });
 
   describe("getSetting", () => {
     it("returns setting value", async () => {
       mockGetFirstAsync
-        .mockResolvedValueOnce({ version: 1 })
+        .mockResolvedValueOnce({ version: 2 })
         .mockResolvedValueOnce({ key: "test", value: "42" });
       const result = await getSetting("test");
       expect(result).toBe("42");
@@ -38,7 +38,7 @@ describe("settingsRepository", () => {
 
     it("returns null for missing setting", async () => {
       mockGetFirstAsync
-        .mockResolvedValueOnce({ version: 1 })
+        .mockResolvedValueOnce({ version: 2 })
         .mockResolvedValueOnce(null);
       const result = await getSetting("missing");
       expect(result).toBeNull();
@@ -62,6 +62,7 @@ describe("settingsRepository", () => {
         { key: "notifications_enabled", value: "false" },
         { key: "luteal_warning_days_before", value: "3" },
         { key: "pms_warning_days_before", value: "1" },
+        { key: "menstrual_warning_days_before", value: "3" },
       ]);
       const result = await getAllSettings();
       expect(result).toEqual({
@@ -69,6 +70,7 @@ describe("settingsRepository", () => {
         notifications_enabled: false,
         luteal_warning_days_before: 3,
         pms_warning_days_before: 1,
+        menstrual_warning_days_before: 3,
       });
     });
 
@@ -82,7 +84,7 @@ describe("settingsRepository", () => {
   describe("saveAllSettings", () => {
     it("saves all settings", async () => {
       await saveAllSettings(DEFAULT_SETTINGS);
-      expect(mockRunAsync).toHaveBeenCalledTimes(4);
+      expect(mockRunAsync).toHaveBeenCalledTimes(5);
     });
   });
 });

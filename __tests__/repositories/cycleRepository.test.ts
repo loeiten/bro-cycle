@@ -6,6 +6,7 @@ import {
   insertCycle,
   deleteCycle,
   getCycleCount,
+  updateCycle,
 } from "../../src/repositories/cycleRepository";
 import { resetDatabase } from "../../src/repositories/database";
 import { Cycle } from "../../src/types";
@@ -34,8 +35,8 @@ describe("cycleRepository", () => {
     jest.clearAllMocks();
     resetDatabase();
     (SQLite.openDatabaseAsync as jest.Mock).mockResolvedValue(mockDb);
-    // Mock schema_version check (return version 1 to skip migrations)
-    mockGetFirstAsync.mockResolvedValue({ version: 1 });
+    // Mock schema_version check (return version 2 to skip migrations)
+    mockGetFirstAsync.mockResolvedValue({ version: 2 });
   });
 
   describe("getAllCycles", () => {
@@ -52,7 +53,7 @@ describe("cycleRepository", () => {
   describe("getLatestCycle", () => {
     it("returns the most recent cycle", async () => {
       mockGetFirstAsync
-        .mockResolvedValueOnce({ version: 1 }) // schema check
+        .mockResolvedValueOnce({ version: 2 }) // schema check
         .mockResolvedValueOnce(mockCycle);
       const result = await getLatestCycle();
       expect(result).toEqual(mockCycle);
@@ -62,7 +63,7 @@ describe("cycleRepository", () => {
   describe("getCycleById", () => {
     it("returns cycle by ID", async () => {
       mockGetFirstAsync
-        .mockResolvedValueOnce({ version: 1 })
+        .mockResolvedValueOnce({ version: 2 })
         .mockResolvedValueOnce(mockCycle);
       const result = await getCycleById(1);
       expect(result).toEqual(mockCycle);
@@ -75,12 +76,22 @@ describe("cycleRepository", () => {
       mockGetAllAsync.mockResolvedValueOnce([]); // no settings
       mockGetAllAsync.mockResolvedValueOnce([mockCycle]); // getAllCycles
       mockGetFirstAsync
-        .mockResolvedValueOnce({ version: 1 }) // schema check
+        .mockResolvedValueOnce({ version: 2 }) // schema check
         .mockResolvedValueOnce(mockCycle); // getCycleById
       await insertCycle("2024-03-01", 28);
       expect(mockRunAsync).toHaveBeenCalledWith(
         "INSERT INTO cycles (start_date, cycle_length, notes) VALUES (?, ?, ?)",
         ["2024-03-01", 28, null],
+      );
+    });
+  });
+
+  describe("updateCycle", () => {
+    it("updates cycle fields", async () => {
+      await updateCycle(1, "2024-04-01", 30, "edited");
+      expect(mockRunAsync).toHaveBeenCalledWith(
+        "UPDATE cycles SET start_date = ?, cycle_length = ?, notes = ? WHERE id = ?",
+        ["2024-04-01", 30, "edited", 1],
       );
     });
   });
@@ -98,7 +109,7 @@ describe("cycleRepository", () => {
   describe("getCycleCount", () => {
     it("returns count of cycles", async () => {
       mockGetFirstAsync
-        .mockResolvedValueOnce({ version: 1 })
+        .mockResolvedValueOnce({ version: 2 })
         .mockResolvedValueOnce({ count: 5 });
       const result = await getCycleCount();
       expect(result).toBe(5);
@@ -106,7 +117,7 @@ describe("cycleRepository", () => {
 
     it("returns 0 when no result", async () => {
       mockGetFirstAsync
-        .mockResolvedValueOnce({ version: 1 })
+        .mockResolvedValueOnce({ version: 2 })
         .mockResolvedValueOnce(null);
       const result = await getCycleCount();
       expect(result).toBe(0);

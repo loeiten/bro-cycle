@@ -5,36 +5,86 @@ export const PHASE_COLORS: Record<
   { primary: string; light: string; gradient: [string, string] }
 > = {
   [CyclePhase.Menstrual]: {
-    primary: "#E74C3C",
-    light: "#FADBD8",
-    gradient: ["#E74C3C", "#FADBD8"],
+    primary: "#EF4444",
+    light: "#FEE2E2",
+    gradient: ["#EF4444", "#FCA5A5"],
   },
   [CyclePhase.Follicular]: {
-    primary: "#2ECC71",
-    light: "#D5F5E3",
-    gradient: ["#2ECC71", "#D5F5E3"],
+    primary: "#22C55E",
+    light: "#DCFCE7",
+    gradient: ["#22C55E", "#86EFAC"],
   },
   [CyclePhase.Luteal]: {
-    primary: "#F39C12",
-    light: "#FDEBD0",
-    gradient: ["#F39C12", "#FDEBD0"],
+    primary: "#F97316",
+    light: "#FFF7ED",
+    gradient: ["#F97316", "#FDBA74"],
   },
   [CyclePhase.PMS]: {
-    primary: "#9B59B6",
-    light: "#E8DAEF",
-    gradient: ["#9B59B6", "#E8DAEF"],
+    primary: "#A855F7",
+    light: "#F3E8FF",
+    gradient: ["#A855F7", "#D8B4FE"],
   },
 };
 
 export const COLORS = {
-  background: "#F8F9FA",
+  background: "#F8FAFC",
   surface: "#FFFFFF",
-  text: "#2C3E50",
-  textSecondary: "#7F8C8D",
-  border: "#E0E0E0",
-  error: "#E74C3C",
-  success: "#2ECC71",
-  warning: "#F39C12",
+  surfaceElevated: "#F1F5F9",
+  text: "#0F172A",
+  textSecondary: "#64748B",
+  border: "#E2E8F0",
+  borderLight: "#F1F5F9",
+  error: "#EF4444",
+  success: "#22C55E",
+  warning: "#F97316",
+  accent: "#38BDF8",
+};
+
+export const SHADOWS = {
+  sm: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  md: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  lg: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 5,
+  },
+  glow: (color: string) => ({
+    shadowColor: color,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 4,
+  }),
+};
+
+export const GRADIENTS = {
+  screenBackground: ["#F8FAFC", "#E2E8F0", "#F8FAFC"] as const,
+  warmCard: ["#FFFFFF", "#F1F5F9"] as const,
+  buttonPrimary: ["#22C55E", "#16A34A"] as const,
+  buttonDanger: ["#EF4444", "#DC2626"] as const,
+  buttonAccent: ["#38BDF8", "#0EA5E9"] as const,
+  onboardingHero: ["#DCFCE7", "#E0F2FE", "#F8FAFC"] as const,
+  tabBar: ["#F1F5F9", "#F8FAFC"] as const,
+  phaseHero: {
+    [CyclePhase.Menstrual]: ["#FEE2E2", "#F8FAFC"] as const,
+    [CyclePhase.Follicular]: ["#DCFCE7", "#F8FAFC"] as const,
+    [CyclePhase.Luteal]: ["#FFF7ED", "#F8FAFC"] as const,
+    [CyclePhase.PMS]: ["#F3E8FF", "#F8FAFC"] as const,
+  },
 };
 
 export const SPACING = {
@@ -61,5 +111,6 @@ export const BORDER_RADIUS = {
   md: 12,
   lg: 16,
   xl: 24,
+  xxl: 32,
   full: 999,
 };

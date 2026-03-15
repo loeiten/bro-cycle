@@ -70,6 +70,30 @@ export async function schedulePhaseWarnings(
     }
   }
 
+  // Menstrual (period) warning — warns X days before next period
+  const nextPeriodDay = cycle.cycle_length + 1;
+  const menstrualWarningDay =
+    nextPeriodDay - settings.menstrual_warning_days_before;
+  if (menstrualWarningDay > 0) {
+    const menstrualDate = addDaysToDate(
+      cycle.start_date,
+      menstrualWarningDay - 1,
+    );
+    if (menstrualDate > new Date()) {
+      const id = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Period Approaching",
+          body: "Her period may start soon. Time to be extra thoughtful and prepared!",
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: menstrualDate,
+        },
+      });
+      ids.push(id);
+    }
+  }
+
   return ids;
 }
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react-native";
+import { render, screen, fireEvent } from "@testing-library/react-native";
 import { CycleHistoryItem } from "../../src/components/CycleHistoryItem";
 import { Cycle, MoodTrend } from "../../src/types";
 
@@ -39,5 +39,37 @@ describe("CycleHistoryItem", () => {
   it("does not render mood section without trend data", () => {
     render(<CycleHistoryItem cycle={mockCycle} />);
     expect(screen.queryByText(/Avg mood/)).toBeNull();
+  });
+
+  it("shows edit button when onEdit is provided", () => {
+    const onEdit = jest.fn();
+    render(<CycleHistoryItem cycle={mockCycle} onEdit={onEdit} />);
+    expect(screen.getByLabelText("Edit cycle")).toBeTruthy();
+  });
+
+  it("calls onEdit when edit button is pressed", () => {
+    const onEdit = jest.fn();
+    render(<CycleHistoryItem cycle={mockCycle} onEdit={onEdit} />);
+    fireEvent.press(screen.getByLabelText("Edit cycle"));
+    expect(onEdit).toHaveBeenCalledWith(mockCycle);
+  });
+
+  it("shows delete button when onDelete is provided", () => {
+    const onDelete = jest.fn();
+    render(<CycleHistoryItem cycle={mockCycle} onDelete={onDelete} />);
+    expect(screen.getByLabelText("Delete cycle")).toBeTruthy();
+  });
+
+  it("calls onDelete when delete button is pressed", () => {
+    const onDelete = jest.fn();
+    render(<CycleHistoryItem cycle={mockCycle} onDelete={onDelete} />);
+    fireEvent.press(screen.getByLabelText("Delete cycle"));
+    expect(onDelete).toHaveBeenCalledWith(1);
+  });
+
+  it("does not show edit/delete buttons when callbacks not provided", () => {
+    render(<CycleHistoryItem cycle={mockCycle} />);
+    expect(screen.queryByLabelText("Edit cycle")).toBeNull();
+    expect(screen.queryByLabelText("Delete cycle")).toBeNull();
   });
 });

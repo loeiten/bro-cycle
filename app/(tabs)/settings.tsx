@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useCycle } from "../../src/context/CycleContext";
 import { AppSettings } from "../../src/types";
 import {
@@ -19,6 +20,8 @@ import {
   FONT_SIZES,
   SPACING,
   BORDER_RADIUS,
+  SHADOWS,
+  GRADIENTS,
 } from "../../src/constants/theme";
 
 export default function SettingsScreen() {
@@ -52,148 +55,205 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Settings</Text>
+    <LinearGradient
+      colors={[...GRADIENTS.screenBackground]}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>Settings</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Cycle Defaults</Text>
+        <LinearGradient
+          colors={[...GRADIENTS.warmCard]}
+          style={[styles.card, SHADOWS.md]}
+        >
+          <Text style={styles.cardTitle}>Cycle Defaults</Text>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Default cycle length</Text>
-          <View style={styles.stepper}>
-            <TouchableOpacity
-              style={styles.stepperButton}
-              onPress={() =>
-                updateLocal(
-                  "default_cycle_length",
-                  Math.max(21, localSettings.default_cycle_length - 1),
-                )
-              }
-            >
-              <Text style={styles.stepperText}>-</Text>
-            </TouchableOpacity>
-            <Text style={styles.stepperValue}>
-              {localSettings.default_cycle_length}
-            </Text>
-            <TouchableOpacity
-              style={styles.stepperButton}
-              onPress={() =>
-                updateLocal(
-                  "default_cycle_length",
-                  Math.min(45, localSettings.default_cycle_length + 1),
-                )
-              }
-            >
-              <Text style={styles.stepperText}>+</Text>
-            </TouchableOpacity>
+          <View style={styles.row}>
+            <Text style={styles.label}>Default cycle length</Text>
+            <View style={styles.stepper}>
+              <TouchableOpacity
+                style={[styles.stepperButton, SHADOWS.sm]}
+                onPress={() =>
+                  updateLocal(
+                    "default_cycle_length",
+                    Math.max(21, localSettings.default_cycle_length - 1),
+                  )
+                }
+              >
+                <Text style={styles.stepperText}>-</Text>
+              </TouchableOpacity>
+              <Text style={styles.stepperValue}>
+                {localSettings.default_cycle_length}
+              </Text>
+              <TouchableOpacity
+                style={[styles.stepperButton, SHADOWS.sm]}
+                onPress={() =>
+                  updateLocal(
+                    "default_cycle_length",
+                    Math.min(45, localSettings.default_cycle_length + 1),
+                  )
+                }
+              >
+                <Text style={styles.stepperText}>+</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </View>
+        </LinearGradient>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Notifications</Text>
+        <LinearGradient
+          colors={[...GRADIENTS.warmCard]}
+          style={[styles.card, SHADOWS.md]}
+        >
+          <Text style={styles.cardTitle}>Notifications</Text>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Enable phase warnings</Text>
-          <Switch
-            value={localSettings.notifications_enabled}
-            onValueChange={(v) => updateLocal("notifications_enabled", v)}
-            trackColor={{ false: "#E0E0E0", true: "#2ECC71" }}
-          />
-        </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Enable phase warnings</Text>
+            <Switch
+              value={localSettings.notifications_enabled}
+              onValueChange={(v) => updateLocal("notifications_enabled", v)}
+              trackColor={{ false: COLORS.border, true: "#22C55E" }}
+            />
+          </View>
 
-        {localSettings.notifications_enabled && (
-          <>
-            <View style={styles.row}>
-              <Text style={styles.label}>Warn before Luteal (days)</Text>
-              <View style={styles.stepper}>
-                <TouchableOpacity
-                  style={styles.stepperButton}
-                  onPress={() =>
-                    updateLocal(
-                      "luteal_warning_days_before",
-                      Math.max(1, localSettings.luteal_warning_days_before - 1),
-                    )
-                  }
-                >
-                  <Text style={styles.stepperText}>-</Text>
-                </TouchableOpacity>
-                <Text style={styles.stepperValue}>
-                  {localSettings.luteal_warning_days_before}
-                </Text>
-                <TouchableOpacity
-                  style={styles.stepperButton}
-                  onPress={() =>
-                    updateLocal(
-                      "luteal_warning_days_before",
-                      Math.min(7, localSettings.luteal_warning_days_before + 1),
-                    )
-                  }
-                >
-                  <Text style={styles.stepperText}>+</Text>
-                </TouchableOpacity>
+          {localSettings.notifications_enabled && (
+            <>
+              <View style={styles.row}>
+                <Text style={styles.label}>Warn before Luteal (days)</Text>
+                <View style={styles.stepper}>
+                  <TouchableOpacity
+                    style={[styles.stepperButton, SHADOWS.sm]}
+                    onPress={() =>
+                      updateLocal(
+                        "luteal_warning_days_before",
+                        Math.max(
+                          1,
+                          localSettings.luteal_warning_days_before - 1,
+                        ),
+                      )
+                    }
+                  >
+                    <Text style={styles.stepperText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.stepperValue}>
+                    {localSettings.luteal_warning_days_before}
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.stepperButton, SHADOWS.sm]}
+                    onPress={() =>
+                      updateLocal(
+                        "luteal_warning_days_before",
+                        Math.min(
+                          7,
+                          localSettings.luteal_warning_days_before + 1,
+                        ),
+                      )
+                    }
+                  >
+                    <Text style={styles.stepperText}>+</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.row}>
-              <Text style={styles.label}>Warn before PMS (days)</Text>
-              <View style={styles.stepper}>
-                <TouchableOpacity
-                  style={styles.stepperButton}
-                  onPress={() =>
-                    updateLocal(
-                      "pms_warning_days_before",
-                      Math.max(1, localSettings.pms_warning_days_before - 1),
-                    )
-                  }
-                >
-                  <Text style={styles.stepperText}>-</Text>
-                </TouchableOpacity>
-                <Text style={styles.stepperValue}>
-                  {localSettings.pms_warning_days_before}
-                </Text>
-                <TouchableOpacity
-                  style={styles.stepperButton}
-                  onPress={() =>
-                    updateLocal(
-                      "pms_warning_days_before",
-                      Math.min(7, localSettings.pms_warning_days_before + 1),
-                    )
-                  }
-                >
-                  <Text style={styles.stepperText}>+</Text>
-                </TouchableOpacity>
+              <View style={styles.row}>
+                <Text style={styles.label}>Warn before PMS (days)</Text>
+                <View style={styles.stepper}>
+                  <TouchableOpacity
+                    style={[styles.stepperButton, SHADOWS.sm]}
+                    onPress={() =>
+                      updateLocal(
+                        "pms_warning_days_before",
+                        Math.max(1, localSettings.pms_warning_days_before - 1),
+                      )
+                    }
+                  >
+                    <Text style={styles.stepperText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.stepperValue}>
+                    {localSettings.pms_warning_days_before}
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.stepperButton, SHADOWS.sm]}
+                    onPress={() =>
+                      updateLocal(
+                        "pms_warning_days_before",
+                        Math.min(7, localSettings.pms_warning_days_before + 1),
+                      )
+                    }
+                  >
+                    <Text style={styles.stepperText}>+</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </>
-        )}
-      </View>
 
-      <TouchableOpacity
-        style={styles.saveButton}
-        onPress={handleSave}
-        accessibilityRole="button"
-        accessibilityLabel="Save settings"
-      >
-        <Text style={styles.saveButtonText}>Save Settings</Text>
-      </TouchableOpacity>
+              <View style={styles.row}>
+                <Text style={styles.label}>Warn before Period (days)</Text>
+                <View style={styles.stepper}>
+                  <TouchableOpacity
+                    style={[styles.stepperButton, SHADOWS.sm]}
+                    onPress={() =>
+                      updateLocal(
+                        "menstrual_warning_days_before",
+                        Math.max(
+                          1,
+                          localSettings.menstrual_warning_days_before - 1,
+                        ),
+                      )
+                    }
+                  >
+                    <Text style={styles.stepperText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.stepperValue}>
+                    {localSettings.menstrual_warning_days_before}
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.stepperButton, SHADOWS.sm]}
+                    onPress={() =>
+                      updateLocal(
+                        "menstrual_warning_days_before",
+                        Math.min(
+                          7,
+                          localSettings.menstrual_warning_days_before + 1,
+                        ),
+                      )
+                    }
+                  >
+                    <Text style={styles.stepperText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </>
+          )}
+        </LinearGradient>
 
-      <View style={styles.about}>
-        <Text style={styles.aboutTitle}>About BroCycle</Text>
-        <Text style={styles.aboutText}>
-          All data is stored locally on your device and never sent anywhere.
-          This app is designed to help partners be more understanding and
-          supportive.
-        </Text>
-      </View>
-    </ScrollView>
+        <TouchableOpacity
+          onPress={handleSave}
+          accessibilityRole="button"
+          accessibilityLabel="Save settings"
+        >
+          <LinearGradient
+            colors={[...GRADIENTS.buttonPrimary]}
+            style={[styles.saveButton, SHADOWS.glow("#22C55E")]}
+          >
+            <Text style={styles.saveButtonText}>Save Settings</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <View style={styles.about}>
+          <Text style={styles.aboutTitle}>About BroCycle</Text>
+          <Text style={styles.aboutText}>
+            All data is stored locally on your device and never sent anywhere.
+            This app is designed to help partners be more understanding and
+            supportive.
+          </Text>
+        </View>
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   content: {
     padding: SPACING.lg,
@@ -205,15 +265,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.md,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 1,
   },
   cardTitle: {
     fontSize: FONT_SIZES.lg,
@@ -238,19 +292,17 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   stepperButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.surfaceElevated,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   stepperText: {
     fontSize: FONT_SIZES.lg,
     fontWeight: "bold",
-    color: COLORS.text,
+    color: COLORS.accent,
   },
   stepperValue: {
     fontSize: FONT_SIZES.lg,
@@ -260,7 +312,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   saveButton: {
-    backgroundColor: "#2ECC71",
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
     alignItems: "center",

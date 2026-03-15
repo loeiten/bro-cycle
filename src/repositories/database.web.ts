@@ -42,9 +42,7 @@ class InMemoryDatabase {
     if (insertIgnoreMatch) {
       const [, table, colStr, valStr] = insertIgnoreMatch;
       const cols = colStr.split(",").map((c) => c.trim());
-      const vals = valStr
-        .split(",")
-        .map((v) => v.trim().replace(/^'|'$/g, ""));
+      const vals = valStr.split(",").map((v) => v.trim().replace(/^'|'$/g, ""));
       const rows = this.tables.get(table) || [];
       if (!rows.some((r) => r[cols[0]] === vals[0])) {
         const row: Row = {};
@@ -63,9 +61,7 @@ class InMemoryDatabase {
     if (insertMatch) {
       const [, table, colStr, valStr] = insertMatch;
       const cols = colStr.split(",").map((c) => c.trim());
-      const vals = valStr
-        .split(",")
-        .map((v) => v.trim().replace(/^'|'$/g, ""));
+      const vals = valStr.split(",").map((v) => v.trim().replace(/^'|'$/g, ""));
       const rows = this.tables.get(table) || [];
       const row: Row = {};
       cols.forEach((col, i) => {
@@ -111,7 +107,10 @@ class InMemoryDatabase {
         cols.forEach((col, i) => {
           row[col] = p[i] ?? null;
         });
-        row.created_at = new Date().toISOString().replace("T", " ").slice(0, 19);
+        row.created_at = new Date()
+          .toISOString()
+          .replace("T", " ")
+          .slice(0, 19);
         rows.push(row);
         this.tables.set(table, rows);
         return { lastInsertRowId: id ?? 0, changes: 1 };
@@ -119,9 +118,7 @@ class InMemoryDatabase {
     }
 
     // Regular INSERT
-    const insertMatch = sql.match(
-      /INSERT INTO (\w+)\s*\(([^)]+)\)\s*VALUES/i,
-    );
+    const insertMatch = sql.match(/INSERT INTO (\w+)\s*\(([^)]+)\)\s*VALUES/i);
     if (insertMatch) {
       const [, table, colStr] = insertMatch;
       const cols = colStr.split(",").map((c) => c.trim());
@@ -142,17 +139,23 @@ class InMemoryDatabase {
       return { lastInsertRowId: id ?? 0, changes: 1 };
     }
 
-    // UPDATE table SET col = ? WHERE col = ?
+    // UPDATE table SET col1 = ?, col2 = ?, ... WHERE col = ?
     const updateMatch = sql.match(
-      /UPDATE (\w+)\s+SET\s+(\w+)\s*=\s*\?\s+WHERE\s+(\w+)\s*=\s*\?/i,
+      /UPDATE (\w+)\s+SET\s+(.+?)\s+WHERE\s+(\w+)\s*=\s*\?/i,
     );
     if (updateMatch) {
-      const [, table, setCol, whereCol] = updateMatch;
+      const [, table, setClause, whereCol] = updateMatch;
+      const setCols = setClause
+        .split(",")
+        .map((s) => s.trim().replace(/\s*=\s*\?/, ""));
+      const whereVal = p[setCols.length];
       const rows = this.tables.get(table) || [];
       let changes = 0;
       for (const row of rows) {
-        if (String(row[whereCol]) === String(p[1])) {
-          row[setCol] = p[0];
+        if (String(row[whereCol]) === String(whereVal)) {
+          setCols.forEach((col, i) => {
+            row[col] = p[i];
+          });
           changes++;
         }
       }
@@ -194,15 +197,15 @@ class InMemoryDatabase {
     const rangeMatch = sql.match(/(\w+)\s*>=\s*\?\s*AND\s*\w+\s*<=\s*\?/i);
     if (rangeMatch) {
       const col = rangeMatch[1];
-      rows = rows.filter((r) => r[col] >= p[0] && r[col] <= p[1]);
+      rows = rows.filter(
+        (r) => String(r[col]) >= String(p[0]) && String(r[col]) <= String(p[1]),
+      );
     }
     // col = ?
     else {
       const whereMatch = sql.match(/WHERE\s+(\w+)\s*=\s*\?/i);
       if (whereMatch) {
-        rows = rows.filter(
-          (r) => String(r[whereMatch[1]]) === String(p[0]),
-        );
+        rows = rows.filter((r) => String(r[whereMatch[1]]) === String(p[0]));
       }
     }
 
@@ -304,6 +307,10 @@ const MIGRATIONS: Migration[] = [
       INSERT OR IGNORE INTO settings (key, value) VALUES ('luteal_warning_days_before', '2');
       INSERT OR IGNORE INTO settings (key, value) VALUES ('pms_warning_days_before', '2')
     `,
+  },
+  {
+    version: 2,
+    sql: `INSERT OR IGNORE INTO settings (key, value) VALUES ('menstrual_warning_days_before', '2')`,
   },
 ];
 

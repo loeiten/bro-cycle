@@ -19,6 +19,7 @@ jest.mock("../../src/repositories/cycleRepository", () => ({
     notes: null,
     created_at: "2024-03-01T00:00:00",
   }),
+  updateCycle: jest.fn().mockResolvedValue(undefined),
   deleteCycle: jest.fn().mockResolvedValue(undefined),
   getCycleCount: jest.fn().mockResolvedValue(0),
 }));
@@ -41,13 +42,21 @@ jest.mock("../../src/repositories/settingsRepository", () => ({
     notifications_enabled: true,
     luteal_warning_days_before: 2,
     pms_warning_days_before: 2,
+    menstrual_warning_days_before: 2,
   }),
   saveAllSettings: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("../../src/services/notificationService", () => ({
+  schedulePhaseWarnings: jest.fn().mockResolvedValue([]),
+  requestPermissions: jest.fn().mockResolvedValue(true),
+  cancelAllNotifications: jest.fn().mockResolvedValue(undefined),
 }));
 
 const cycleRepo = require("../../src/repositories/cycleRepository");
 const moodRepo = require("../../src/repositories/moodRepository");
 const settingsRepo = require("../../src/repositories/settingsRepository");
+const notificationService = require("../../src/services/notificationService");
 
 function TestConsumer() {
   const ctx = useCycle();
@@ -63,6 +72,10 @@ function TestConsumer() {
       <TouchableOpacity
         testID="addCycle"
         onPress={() => ctx.addCycle("2024-03-01", 28)}
+      />
+      <TouchableOpacity
+        testID="updateCycle"
+        onPress={() => ctx.updateCycle(1, "2024-04-01", 30, "edited")}
       />
       <TouchableOpacity
         testID="deleteCycle"
@@ -84,6 +97,7 @@ function TestConsumer() {
             notifications_enabled: false,
             luteal_warning_days_before: 3,
             pms_warning_days_before: 3,
+            menstrual_warning_days_before: 3,
           })
         }
       />
@@ -102,6 +116,7 @@ describe("CycleContext", () => {
       notifications_enabled: true,
       luteal_warning_days_before: 2,
       pms_warning_days_before: 2,
+      menstrual_warning_days_before: 2,
     });
   });
 
@@ -158,6 +173,26 @@ describe("CycleContext", () => {
     });
   });
 
+  it("schedules notifications when cycle exists", async () => {
+    cycleRepo.getAllCycles.mockResolvedValue([
+      {
+        id: 1,
+        start_date: "2024-03-01",
+        cycle_length: 28,
+        notes: null,
+        created_at: "2024-03-01",
+      },
+    ]);
+    render(
+      <CycleProvider>
+        <TestConsumer />
+      </CycleProvider>,
+    );
+    await waitFor(() => {
+      expect(notificationService.schedulePhaseWarnings).toHaveBeenCalled();
+    });
+  });
+
   it("calls addCycle and refreshes data", async () => {
     render(
       <CycleProvider>
@@ -173,6 +208,26 @@ describe("CycleContext", () => {
         "2024-03-01",
         28,
         undefined,
+      );
+    });
+  });
+
+  it("calls updateCycle and refreshes data", async () => {
+    render(
+      <CycleProvider>
+        <TestConsumer />
+      </CycleProvider>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("updateCycle")).toBeTruthy();
+    });
+    fireEvent.press(screen.getByTestId("updateCycle"));
+    await waitFor(() => {
+      expect(cycleRepo.updateCycle).toHaveBeenCalledWith(
+        1,
+        "2024-04-01",
+        30,
+        "edited",
       );
     });
   });

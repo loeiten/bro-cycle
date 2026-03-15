@@ -1,6 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { FONT_SIZES, SPACING, BORDER_RADIUS } from "../constants/theme";
+import { Text, StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  FONT_SIZES,
+  SPACING,
+  BORDER_RADIUS,
+  SHADOWS,
+} from "../constants/theme";
 
 interface Props {
   message: string;
@@ -8,30 +14,40 @@ interface Props {
 }
 
 const BANNER_COLORS = {
-  warning: { bg: "#FFF3CD", text: "#856404", border: "#F39C12" },
-  info: { bg: "#D1ECF1", text: "#0C5460", border: "#17A2B8" },
-  overdue: { bg: "#F8D7DA", text: "#721C24", border: "#E74C3C" },
+  warning: {
+    gradient: ["#FFF7ED", "#FFEDD5"] as const,
+    text: "#9A3412",
+    border: "#F97316",
+  },
+  info: {
+    gradient: ["#E0F2FE", "#BAE6FD"] as const,
+    text: "#075985",
+    border: "#38BDF8",
+  },
+  overdue: {
+    gradient: ["#FEE2E2", "#FECACA"] as const,
+    text: "#991B1B",
+    border: "#EF4444",
+  },
 };
 
 export function WarningBanner({ message, type }: Props) {
   const colors = BANNER_COLORS[type];
 
   return (
-    <View
-      style={[
-        styles.banner,
-        { backgroundColor: colors.bg, borderLeftColor: colors.border },
-      ]}
+    <LinearGradient
+      colors={[...colors.gradient]}
+      style={[styles.banner, { borderLeftColor: colors.border }, SHADOWS.sm]}
     >
       <Text style={[styles.text, { color: colors.text }]}>{message}</Text>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   banner: {
-    borderRadius: BORDER_RADIUS.sm,
-    borderLeftWidth: 4,
+    borderRadius: BORDER_RADIUS.md,
+    borderLeftWidth: 5,
     padding: SPACING.md,
     marginBottom: SPACING.md,
   },

@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { PhaseInfo, CyclePhase } from "../types";
 import {
   PHASE_COLORS,
@@ -7,6 +8,7 @@ import {
   FONT_SIZES,
   SPACING,
   BORDER_RADIUS,
+  SHADOWS,
 } from "../constants/theme";
 import { PHASE_DEFINITIONS } from "../constants/phases";
 
@@ -107,71 +109,90 @@ export function VerticalTimeline({ phaseInfo }: Props) {
 
               {/* Track column */}
               <View style={styles.trackColumn}>
-                <View
-                  style={[
-                    styles.trackSegment,
-                    {
-                      backgroundColor: isActive
-                        ? colors.primary
-                        : isPast
-                          ? colors.primary
-                          : colors.light,
-                      opacity: isActive ? 1 : isPast ? 0.6 : 0.3,
-                    },
-                    index === 0 && styles.trackTop,
-                    index === segments.length - 1 && styles.trackBottom,
-                  ]}
-                >
-                  {/* Current day marker */}
-                  {markerInSegment && (
-                    <View
-                      style={[
-                        styles.marker,
-                        {
-                          top: `${markerPosition * 100}%`,
-                          backgroundColor: colors.primary,
-                        },
-                      ]}
-                    >
-                      <View style={styles.markerDot} />
-                    </View>
-                  )}
-                </View>
+                {isActive || isPast ? (
+                  <LinearGradient
+                    colors={[...colors.gradient]}
+                    style={[
+                      styles.trackSegment,
+                      { opacity: isActive ? 1 : 0.6 },
+                      index === 0 && styles.trackTop,
+                      index === segments.length - 1 && styles.trackBottom,
+                    ]}
+                  >
+                    {markerInSegment && (
+                      <View
+                        style={[
+                          styles.marker,
+                          {
+                            top: `${markerPosition * 100}%`,
+                            backgroundColor: colors.primary,
+                          },
+                          SHADOWS.glow(colors.primary),
+                        ]}
+                      >
+                        <View style={styles.markerDot} />
+                      </View>
+                    )}
+                  </LinearGradient>
+                ) : (
+                  <View
+                    style={[
+                      styles.trackSegment,
+                      {
+                        backgroundColor: colors.light,
+                        opacity: 0.3,
+                      },
+                      index === 0 && styles.trackTop,
+                      index === segments.length - 1 && styles.trackBottom,
+                    ]}
+                  />
+                )}
               </View>
 
               {/* Info column */}
               <View style={styles.infoColumn}>
-                <View
-                  style={[
-                    styles.phaseInfoCard,
-                    isActive && {
-                      backgroundColor: colors.light,
-                      borderColor: colors.primary,
-                      borderWidth: 1.5,
-                    },
-                  ]}
-                >
-                  <View style={styles.phaseInfoHeader}>
-                    <Text style={styles.phaseEmoji}>{segment.emoji}</Text>
-                    <Text
-                      style={[
-                        styles.phaseName,
-                        isActive && {
-                          color: colors.primary,
-                          fontWeight: "bold",
-                        },
-                      ]}
-                    >
-                      {PHASE_DEFINITIONS[segment.phase].name}
-                    </Text>
-                  </View>
-                  <Text style={styles.phaseTip}>{segment.tip}</Text>
-                  {isActive && (
+                {isActive ? (
+                  <LinearGradient
+                    colors={[colors.light, "#FFFFFF"]}
+                    style={[
+                      styles.phaseInfoCard,
+                      {
+                        borderColor: colors.primary,
+                        borderWidth: 2,
+                      },
+                      SHADOWS.sm,
+                    ]}
+                  >
+                    <View style={styles.phaseInfoHeader}>
+                      <Text style={styles.phaseEmoji}>{segment.emoji}</Text>
+                      <Text
+                        style={[
+                          styles.phaseName,
+                          {
+                            color: colors.primary,
+                            fontWeight: "bold",
+                          },
+                        ]}
+                      >
+                        {PHASE_DEFINITIONS[segment.phase].name}
+                      </Text>
+                    </View>
+                    <Text style={styles.phaseTip}>{segment.tip}</Text>
                     <Text style={[styles.activeDay, { color: colors.primary }]}>
                       Day {dayInCycle} of {totalCycleDays}
                     </Text>
-                  )}
-                </View>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.phaseInfoCard}>
+                    <View style={styles.phaseInfoHeader}>
+                      <Text style={styles.phaseEmoji}>{segment.emoji}</Text>
+                      <Text style={styles.phaseName}>
+                        {PHASE_DEFINITIONS[segment.phase].name}
+                      </Text>
+                    </View>
+                    <Text style={styles.phaseTip}>{segment.tip}</Text>
+                  </View>
+                )}
               </View>
             </View>
           );
@@ -180,7 +201,7 @@ export function VerticalTimeline({ phaseInfo }: Props) {
 
       {/* Overdue indicator */}
       {isOverdue && (
-        <View style={styles.overdueBar}>
+        <View style={[styles.overdueBar, SHADOWS.sm]}>
           <Text style={styles.overdueEmoji}>{"\u26A0\uFE0F"}</Text>
           <Text style={styles.overdueText}>
             Day {dayInCycle} — Cycle may be overdue
@@ -218,40 +239,35 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   trackColumn: {
-    width: 20,
+    width: 24,
     alignItems: "center",
   },
   trackSegment: {
     flex: 1,
-    width: 6,
+    width: 10,
     position: "relative",
   },
   trackTop: {
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
   },
   trackBottom: {
-    borderBottomLeftRadius: 3,
-    borderBottomRightRadius: 3,
+    borderBottomLeftRadius: 5,
+    borderBottomRightRadius: 5,
   },
   marker: {
     position: "absolute",
     left: -9,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
   },
   markerDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: COLORS.surface,
   },
   infoColumn: {
@@ -271,7 +287,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   phaseEmoji: {
-    fontSize: 20,
+    fontSize: 24,
   },
   phaseName: {
     fontSize: FONT_SIZES.md,
@@ -281,20 +297,20 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.xs,
     color: COLORS.textSecondary,
     marginTop: 2,
-    marginLeft: 28,
+    marginLeft: 32,
   },
   activeDay: {
     fontSize: FONT_SIZES.xs,
     fontWeight: "bold",
     marginTop: 2,
-    marginLeft: 28,
+    marginLeft: 32,
   },
   overdueBar: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFF3CD",
     padding: SPACING.sm,
-    borderRadius: BORDER_RADIUS.sm,
+    borderRadius: BORDER_RADIUS.md,
     marginTop: SPACING.sm,
     gap: SPACING.sm,
   },

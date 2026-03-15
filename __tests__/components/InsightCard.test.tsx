@@ -6,6 +6,8 @@ const mockItem = {
   id: "test-1",
   title: "Test Insight",
   content: "This is the content of the insight.",
+  emoji: "\uD83D\uDCA1",
+  shortTip: "A short tip for display",
 };
 
 describe("InsightCard", () => {

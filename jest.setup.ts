@@ -1,3 +1,9 @@
+// Mock expo-linear-gradient
+jest.mock("expo-linear-gradient", () => {
+  const { View } = require("react-native");
+  return { LinearGradient: View };
+});
+
 // Mock expo-sqlite
 jest.mock("expo-sqlite", () => ({
   openDatabaseAsync: jest.fn(),

@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { CyclePhase } from "../types";
 import {
   PHASE_COLORS,
@@ -7,6 +8,8 @@ import {
   FONT_SIZES,
   SPACING,
   BORDER_RADIUS,
+  SHADOWS,
+  GRADIENTS,
 } from "../constants/theme";
 import { PHASE_DEFINITIONS } from "../constants/phases";
 
@@ -22,7 +25,10 @@ export function PhaseCard({ phase, dayInPhase, totalPhaseDays }: Props) {
   const progress = dayInPhase / totalPhaseDays;
 
   return (
-    <View style={[styles.card, { borderLeftColor: colors.primary }]}>
+    <LinearGradient
+      colors={[...GRADIENTS.warmCard]}
+      style={[styles.card, { borderLeftColor: colors.primary }]}
+    >
       <View style={styles.header}>
         <Text style={[styles.phaseName, { color: colors.primary }]}>
           {definition.name} Phase
@@ -33,31 +39,28 @@ export function PhaseCard({ phase, dayInPhase, totalPhaseDays }: Props) {
       </View>
       <Text style={styles.description}>{definition.description}</Text>
       <View style={styles.progressBar}>
-        <View
+        <LinearGradient
+          colors={[...colors.gradient]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
           style={[
             styles.progressFill,
             {
               width: `${Math.min(progress * 100, 100)}%`,
-              backgroundColor: colors.primary,
             },
           ]}
         />
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
-    borderLeftWidth: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
+    borderLeftWidth: 5,
+    ...SHADOWS.md,
   },
   header: {
     flexDirection: "row",
@@ -66,7 +69,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   phaseName: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.xl,
     fontWeight: "bold",
   },
   dayCount: {
@@ -80,13 +83,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   progressBar: {
-    height: 6,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 3,
+    height: 10,
+    backgroundColor: COLORS.borderLight,
+    borderRadius: 5,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: 3,
+    borderRadius: 5,
   },
 });

@@ -50,6 +50,19 @@ export async function insertCycle(
   return (await getCycleById(result.lastInsertRowId))!;
 }
 
+export async function updateCycle(
+  id: number,
+  startDate: string,
+  cycleLength: number,
+  notes?: string,
+): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    "UPDATE cycles SET start_date = ?, cycle_length = ?, notes = ? WHERE id = ?",
+    [startDate, cycleLength, notes ?? null, id],
+  );
+}
+
 export async function deleteCycle(id: number): Promise<void> {
   const db = await getDatabase();
   await db.runAsync("DELETE FROM cycles WHERE id = ?", [id]);

@@ -19,6 +19,7 @@ import * as moodRepo from "../repositories/moodRepository";
 import * as settingsRepo from "../repositories/settingsRepository";
 import { getCurrentPhaseInfo } from "../services/cycleCalculator";
 import { predictCycleLength } from "../services/predictionEngine";
+import { schedulePhaseWarnings } from "../services/notificationService";
 
 interface CycleContextType {
   // State
@@ -33,6 +34,12 @@ interface CycleContextType {
 
   // Actions
   addCycle: (
+    startDate: string,
+    cycleLength: number,
+    notes?: string,
+  ) => Promise<void>;
+  updateCycle: (
+    id: number,
     startDate: string,
     cycleLength: number,
     notes?: string,
@@ -78,9 +85,28 @@ export function CycleProvider({ children }: { children: ReactNode }) {
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    if (currentCycle && settings.notifications_enabled) {
+      schedulePhaseWarnings(currentCycle, settings);
+    }
+  }, [currentCycle, settings]);
+
   const addCycle = useCallback(
     async (startDate: string, cycleLength: number, notes?: string) => {
       await cycleRepo.insertCycle(startDate, cycleLength, notes);
+      await loadData();
+    },
+    [loadData],
+  );
+
+  const updateCycle = useCallback(
+    async (
+      id: number,
+      startDate: string,
+      cycleLength: number,
+      notes?: string,
+    ) => {
+      await cycleRepo.updateCycle(id, startDate, cycleLength, notes);
       await loadData();
     },
     [loadData],
@@ -127,6 +153,7 @@ export function CycleProvider({ children }: { children: ReactNode }) {
         isLoading,
         hasOnboarded,
         addCycle,
+        updateCycle,
         deleteCycle,
         logMood,
         deleteMoodLog,

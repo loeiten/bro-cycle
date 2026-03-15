@@ -78,6 +78,10 @@ const MIGRATIONS: Migration[] = [
       INSERT OR IGNORE INTO settings (key, value) VALUES ('pms_warning_days_before', '2');
     `,
   },
+  {
+    version: 2,
+    sql: `INSERT OR IGNORE INTO settings (key, value) VALUES ('menstrual_warning_days_before', '2');`,
+  },
 ];
 
 // For testing: reset the singleton

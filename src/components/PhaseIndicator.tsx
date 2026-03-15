@@ -1,7 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { PhaseInfo, CyclePhase } from "../types";
-import { PHASE_COLORS, COLORS, FONT_SIZES, SPACING } from "../constants/theme";
+import {
+  PHASE_COLORS,
+  COLORS,
+  FONT_SIZES,
+  SPACING,
+  SHADOWS,
+} from "../constants/theme";
 import { PHASE_DEFINITIONS } from "../constants/phases";
 
 interface Props {
@@ -10,7 +16,7 @@ interface Props {
 }
 
 export function PhaseIndicator({ phaseInfo, size = 220 }: Props) {
-  const strokeWidth = 12;
+  const strokeWidth = 14;
   const phases = [
     CyclePhase.Menstrual,
     CyclePhase.Follicular,
@@ -39,7 +45,7 @@ export function PhaseIndicator({ phaseInfo, size = 220 }: Props) {
                   borderRadius: size / 2,
                   borderWidth: strokeWidth,
                   borderColor: color,
-                  opacity: isCurrentPhase ? 1 : 0.3,
+                  opacity: isCurrentPhase ? 1 : 0.2,
                   transform: [{ rotate: `${startAngle}deg` }],
                 },
               ]}
@@ -50,10 +56,13 @@ export function PhaseIndicator({ phaseInfo, size = 220 }: Props) {
 
       {/* Center content */}
       <View style={styles.centerContent}>
-        <Text style={styles.dayNumber}>
-          {phaseInfo.isOverdue
-            ? `${phaseInfo.dayInCycle}`
-            : `${phaseInfo.dayInCycle}`}
+        <Text
+          style={[
+            styles.dayNumber,
+            { color: PHASE_COLORS[phaseInfo.phase].primary },
+          ]}
+        >
+          {phaseInfo.dayInCycle}
         </Text>
         <Text style={styles.dayLabel}>
           {phaseInfo.isOverdue
@@ -64,6 +73,7 @@ export function PhaseIndicator({ phaseInfo, size = 220 }: Props) {
           style={[
             styles.phaseBadge,
             { backgroundColor: PHASE_COLORS[phaseInfo.phase].light },
+            SHADOWS.sm,
           ]}
         >
           <Text
@@ -100,7 +110,6 @@ const styles = StyleSheet.create({
   dayNumber: {
     fontSize: FONT_SIZES.hero,
     fontWeight: "bold",
-    color: COLORS.text,
   },
   dayLabel: {
     fontSize: FONT_SIZES.sm,
