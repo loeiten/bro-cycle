@@ -1,10 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Stack, Redirect } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { CycleProvider, useCycle } from "../src/context/CycleContext";
 
 function RootNavigator() {
   const { isLoading, hasOnboarded } = useCycle();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !hasOnboarded) {
+      router.replace("/onboarding");
+    }
+  }, [isLoading, hasOnboarded, router]);
 
   if (isLoading) {
     return (
@@ -12,10 +19,6 @@ function RootNavigator() {
         <ActivityIndicator size="large" color="#2ECC71" />
       </View>
     );
-  }
-
-  if (!hasOnboarded) {
-    return <Redirect href="/onboarding" />;
   }
 
   return (
