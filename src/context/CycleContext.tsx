@@ -6,6 +6,7 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
+import { Platform } from "react-native";
 import {
   Cycle,
   MoodLog,
@@ -86,7 +87,11 @@ export function CycleProvider({ children }: { children: ReactNode }) {
   }, [loadData]);
 
   useEffect(() => {
-    if (currentCycle && settings.notifications_enabled) {
+    if (
+      Platform.OS !== "web" &&
+      currentCycle &&
+      settings.notifications_enabled
+    ) {
       schedulePhaseWarnings(currentCycle, settings);
     }
   }, [currentCycle, settings]);
