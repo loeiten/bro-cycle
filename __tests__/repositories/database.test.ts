@@ -41,15 +41,15 @@ describe("database", () => {
     expect(mockExecAsync).toHaveBeenCalledTimes(4);
     // Should have inserted version records
     expect(mockRunAsync).toHaveBeenCalledWith(
-      "INSERT INTO schema_version (version) VALUES (?)",
+      "INSERT OR IGNORE INTO schema_version (version) VALUES (?)",
       [1],
     );
     expect(mockRunAsync).toHaveBeenCalledWith(
-      "INSERT INTO schema_version (version) VALUES (?)",
+      "INSERT OR IGNORE INTO schema_version (version) VALUES (?)",
       [2],
     );
     expect(mockRunAsync).toHaveBeenCalledWith(
-      "INSERT INTO schema_version (version) VALUES (?)",
+      "INSERT OR IGNORE INTO schema_version (version) VALUES (?)",
       [3],
     );
   });

@@ -3,6 +3,7 @@ import * as SQLite from "expo-sqlite";
 const DB_NAME = "brocycle.db";
 
 let db: SQLite.SQLiteDatabase | null = null;
+let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (db) {
@@ -13,8 +14,17 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     } catch {
       // Handle went stale (e.g., after hot reload), reopen
       db = null;
+      dbPromise = null;
     }
   }
+  // Use a shared promise to prevent concurrent initialization races
+  if (!dbPromise) {
+    dbPromise = initDatabase();
+  }
+  return dbPromise;
+}
+
+async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
   db = await SQLite.openDatabaseAsync(DB_NAME);
   await runMigrations(db);
   return db;
@@ -35,7 +45,7 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
     if (migration.version > currentVersion) {
       await database.execAsync(migration.sql);
       await database.runAsync(
-        "INSERT INTO schema_version (version) VALUES (?)",
+        "INSERT OR IGNORE INTO schema_version (version) VALUES (?)",
         [migration.version],
       );
     }
@@ -100,4 +110,5 @@ const MIGRATIONS: Migration[] = [
 // For testing: reset the singleton
 export function resetDatabase(): void {
   db = null;
+  dbPromise = null;
 }
