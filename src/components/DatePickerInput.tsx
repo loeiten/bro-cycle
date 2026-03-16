@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Platform, StyleSheet } from "react-native";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { formatDate } from "../utils/dateUtils";
 import {
   COLORS,
@@ -24,13 +27,23 @@ export function DatePickerInput({
 }: Props) {
   const [showPicker, setShowPicker] = useState(false);
 
-  // Simple date input — on mobile, uses a text-based approach
-  // since DateTimePicker requires a native module
   const handleDayChange = (delta: number) => {
     const newDate = new Date(value);
     newDate.setDate(newDate.getDate() + delta);
     if (maximumDate && newDate > maximumDate) return;
     onChange(newDate);
+  };
+
+  const handlePickerChange = (
+    event: DateTimePickerEvent,
+    selectedDate?: Date,
+  ) => {
+    if (Platform.OS === "android") {
+      setShowPicker(false);
+    }
+    if (event.type === "set" && selectedDate) {
+      onChange(selectedDate);
+    }
   };
 
   return (
@@ -46,7 +59,7 @@ export function DatePickerInput({
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.dateDisplay}
-          onPress={() => setShowPicker(!showPicker)}
+          onPress={() => setShowPicker(true)}
           accessibilityLabel={`Selected date: ${formatDate(value)}`}
         >
           <Text style={styles.dateText}>{formatDate(value)}</Text>
@@ -59,6 +72,15 @@ export function DatePickerInput({
           <Text style={styles.arrow}>{"\u25B6"}</Text>
         </TouchableOpacity>
       </View>
+      {showPicker && (
+        <DateTimePicker
+          value={value}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={handlePickerChange}
+          maximumDate={maximumDate}
+        />
+      )}
     </View>
   );
 }

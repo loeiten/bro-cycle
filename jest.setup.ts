@@ -9,6 +9,9 @@ jest.mock("expo-sqlite", () => ({
   openDatabaseAsync: jest.fn(),
 }));
 
+// Mock @react-native-community/datetimepicker
+jest.mock("@react-native-community/datetimepicker", () => "DateTimePicker");
+
 // Mock expo-constants
 jest.mock("expo-constants", () => ({
   executionEnvironment: "standalone",
