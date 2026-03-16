@@ -62,6 +62,16 @@ npx expo run:android --device
 
 Or transfer `android/app/build/outputs/apk/debug/app-debug.apk` to your phone manually.
 
+### Release Build (standalone, no dev server needed)
+
+```bash
+JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home \
+ANDROID_HOME=/opt/homebrew/share/android-commandlinetools \
+npx expo run:android --variant release --device
+```
+
+This bundles the JS into the APK so the app works fully offline without a dev server.
+
 ### Tests & Checks
 
 ```bash
@@ -78,6 +88,8 @@ npm run typecheck       # TypeScript check
 - TypeScript
 - expo-router v6 (file-based routing)
 - expo-sqlite (local database)
+- expo-notifications (phase warning push notifications)
+- @react-native-community/datetimepicker (native calendar picker)
 - date-fns (date math)
 - Jest + React Native Testing Library
 
