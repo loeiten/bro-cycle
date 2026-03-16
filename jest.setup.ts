@@ -9,6 +9,12 @@ jest.mock("expo-sqlite", () => ({
   openDatabaseAsync: jest.fn(),
 }));
 
+// Mock expo-constants
+jest.mock("expo-constants", () => ({
+  executionEnvironment: "standalone",
+  appOwnership: null,
+}));
+
 // Mock expo-notifications
 jest.mock("expo-notifications", () => ({
   setNotificationHandler: jest.fn(),

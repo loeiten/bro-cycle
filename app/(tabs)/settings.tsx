@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useCycle } from "../../src/context/CycleContext";
-import { AppSettings } from "../../src/types";
+import { AppSettings, DEFAULT_SETTINGS } from "../../src/types";
 import {
   requestPermissions,
   cancelAllNotifications,
@@ -26,7 +26,10 @@ import {
 
 export default function SettingsScreen() {
   const { settings, updateSettings } = useCycle();
-  const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
+  const [localSettings, setLocalSettings] = useState<AppSettings>({
+    ...DEFAULT_SETTINGS,
+    ...settings,
+  });
 
   const handleSave = async () => {
     if (
@@ -117,6 +120,43 @@ export default function SettingsScreen() {
 
           {localSettings.notifications_enabled && (
             <>
+              <View style={styles.row}>
+                <Text style={styles.label}>Warn before Follicular (days)</Text>
+                <View style={styles.stepper}>
+                  <TouchableOpacity
+                    style={[styles.stepperButton, SHADOWS.sm]}
+                    onPress={() =>
+                      updateLocal(
+                        "follicular_warning_days_before",
+                        Math.max(
+                          1,
+                          localSettings.follicular_warning_days_before - 1,
+                        ),
+                      )
+                    }
+                  >
+                    <Text style={styles.stepperText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.stepperValue}>
+                    {localSettings.follicular_warning_days_before}
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.stepperButton, SHADOWS.sm]}
+                    onPress={() =>
+                      updateLocal(
+                        "follicular_warning_days_before",
+                        Math.min(
+                          7,
+                          localSettings.follicular_warning_days_before + 1,
+                        ),
+                      )
+                    }
+                  >
+                    <Text style={styles.stepperText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
               <View style={styles.row}>
                 <Text style={styles.label}>Warn before Luteal (days)</Text>
                 <View style={styles.stepper}>

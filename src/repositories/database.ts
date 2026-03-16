@@ -5,7 +5,16 @@ const DB_NAME = "brocycle.db";
 let db: SQLite.SQLiteDatabase | null = null;
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
-  if (db) return db;
+  if (db) {
+    try {
+      // Verify the handle is still valid
+      await db.getFirstAsync("SELECT 1");
+      return db;
+    } catch {
+      // Handle went stale (e.g., after hot reload), reopen
+      db = null;
+    }
+  }
   db = await SQLite.openDatabaseAsync(DB_NAME);
   await runMigrations(db);
   return db;
@@ -81,6 +90,10 @@ const MIGRATIONS: Migration[] = [
   {
     version: 2,
     sql: `INSERT OR IGNORE INTO settings (key, value) VALUES ('menstrual_warning_days_before', '2');`,
+  },
+  {
+    version: 3,
+    sql: `INSERT OR IGNORE INTO settings (key, value) VALUES ('follicular_warning_days_before', '2');`,
   },
 ];
 

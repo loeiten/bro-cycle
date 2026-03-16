@@ -92,6 +92,7 @@ export interface InsightItem {
 export interface AppSettings {
   default_cycle_length: number;
   notifications_enabled: boolean;
+  follicular_warning_days_before: number;
   luteal_warning_days_before: number;
   pms_warning_days_before: number;
   menstrual_warning_days_before: number;
@@ -100,6 +101,7 @@ export interface AppSettings {
 export const DEFAULT_SETTINGS: AppSettings = {
   default_cycle_length: 28,
   notifications_enabled: true,
+  follicular_warning_days_before: 2,
   luteal_warning_days_before: 2,
   pms_warning_days_before: 2,
   menstrual_warning_days_before: 2,

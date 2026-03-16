@@ -1,7 +1,5 @@
 import React, { useEffect } from "react";
-import { ActivityIndicator, LogBox, View } from "react-native";
-
-LogBox.ignoreLogs(["expo-notifications"]);
+import { ActivityIndicator, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { CycleProvider, useCycle } from "../src/context/CycleContext";
 import { COLORS } from "../src/constants/theme";

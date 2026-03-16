@@ -95,6 +95,7 @@ function TestConsumer() {
           ctx.updateSettings({
             default_cycle_length: 30,
             notifications_enabled: false,
+            follicular_warning_days_before: 3,
             luteal_warning_days_before: 3,
             pms_warning_days_before: 3,
             menstrual_warning_days_before: 3,

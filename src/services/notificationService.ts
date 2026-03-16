@@ -1,9 +1,18 @@
-import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 import { Cycle, AppSettings, CyclePhase } from "../types";
 import { addDaysToDate } from "../utils/dateUtils";
 import { getPhaseBoundaries } from "./cycleCalculator";
 
-try {
+const isExpoGo =
+  Constants.executionEnvironment === "storeClient" ||
+  Constants.appOwnership === "expo";
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const Notifications: typeof import("expo-notifications") | null = isExpoGo
+  ? null
+  : require("expo-notifications");
+
+if (Notifications) {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowBanner: true,
@@ -12,107 +21,143 @@ try {
       shouldSetBadge: false,
     }),
   });
-} catch {
-  // Notifications not supported in Expo Go since SDK 53
 }
 
 export async function requestPermissions(): Promise<boolean> {
+  if (!Notifications) return false;
   const { status } = await Notifications.requestPermissionsAsync();
   return status === "granted";
+}
+
+const PHASE_CONFIG: {
+  phase: CyclePhase;
+  label: string;
+  emoji: string;
+  settingsKey: keyof AppSettings;
+}[] = [
+  {
+    phase: CyclePhase.Follicular,
+    label: "Follicular phase",
+    emoji: "\uD83D\uDE0A",
+    settingsKey: "follicular_warning_days_before",
+  },
+  {
+    phase: CyclePhase.Luteal,
+    label: "Luteal phase",
+    emoji: "\uD83D\uDE22",
+    settingsKey: "luteal_warning_days_before",
+  },
+  {
+    phase: CyclePhase.PMS,
+    label: "PMS phase",
+    emoji: "\u26C8\uFE0F",
+    settingsKey: "pms_warning_days_before",
+  },
+];
+
+function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
 }
 
 export async function schedulePhaseWarnings(
   cycle: Cycle,
   settings: AppSettings,
 ): Promise<string[]> {
-  if (!settings.notifications_enabled) return [];
+  if (!Notifications || !settings.notifications_enabled) return [];
 
   try {
-    // Ensure we have permission before scheduling
     const granted = await requestPermissions();
     if (!granted) return [];
 
-    // Cancel existing scheduled notifications
     await Notifications.cancelAllScheduledNotificationsAsync();
 
     const ids: string[] = [];
+    const now = new Date();
     const boundaries = getPhaseBoundaries(cycle.cycle_length);
 
-    // Luteal phase warning
-    const lutealStart = boundaries[CyclePhase.Luteal].start;
-    const lutealWarningDay = lutealStart - settings.luteal_warning_days_before;
-    if (lutealWarningDay > 0) {
-      const lutealDate = addDaysToDate(cycle.start_date, lutealWarningDay - 1);
-      if (lutealDate > new Date()) {
-        const id = await Notifications.scheduleNotificationAsync({
-          content: {
-            title: "Luteal Phase Approaching",
-            body: "The luteal phase starts soon. Mood shifts may begin — be extra supportive!",
-          },
-          trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.DATE,
-            date: lutealDate,
-          },
-        });
-        ids.push(id);
+    // Schedule warnings for each phase
+    for (const config of PHASE_CONFIG) {
+      const phaseStart = boundaries[config.phase].start;
+      const warningDays = settings[config.settingsKey] as number;
+
+      for (let daysUntil = warningDays; daysUntil >= 1; daysUntil--) {
+        const notifCycleDay = phaseStart - daysUntil;
+        if (notifCycleDay < 1) continue;
+
+        const notifDate = addDaysToDate(cycle.start_date, notifCycleDay - 1);
+        const label = daysUntil === 1 ? "1 day" : `${daysUntil} days`;
+        const title = `${config.emoji} ${label} until the ${config.label}`;
+
+        const id = await scheduleForDate(Notifications, notifDate, now, title);
+        if (id) ids.push(id);
       }
     }
 
-    // PMS phase warning
-    const pmsStart = boundaries[CyclePhase.PMS].start;
-    const pmsWarningDay = pmsStart - settings.pms_warning_days_before;
-    if (pmsWarningDay > 0) {
-      const pmsDate = addDaysToDate(cycle.start_date, pmsWarningDay - 1);
-      if (pmsDate > new Date()) {
-        const id = await Notifications.scheduleNotificationAsync({
-          content: {
-            title: "PMS Phase Approaching",
-            body: "PMS phase starts soon. Stock up on snacks, be patient, and show extra care!",
-          },
-          trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.DATE,
-            date: pmsDate,
-          },
-        });
-        ids.push(id);
-      }
-    }
-
-    // Menstrual (period) warning — warns X days before next period
+    // Menstrual (next period) warnings
     const nextPeriodDay = cycle.cycle_length + 1;
-    const menstrualWarningDay =
-      nextPeriodDay - settings.menstrual_warning_days_before;
-    if (menstrualWarningDay > 0) {
-      const menstrualDate = addDaysToDate(
-        cycle.start_date,
-        menstrualWarningDay - 1,
-      );
-      if (menstrualDate > new Date()) {
-        const id = await Notifications.scheduleNotificationAsync({
-          content: {
-            title: "Period Approaching",
-            body: "Her period may start soon. Time to be extra thoughtful and prepared!",
-          },
-          trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.DATE,
-            date: menstrualDate,
-          },
-        });
-        ids.push(id);
-      }
+    const menstrualWarningDays = settings.menstrual_warning_days_before;
+
+    for (let daysUntil = menstrualWarningDays; daysUntil >= 1; daysUntil--) {
+      const notifCycleDay = nextPeriodDay - daysUntil;
+      if (notifCycleDay < 1) continue;
+
+      const notifDate = addDaysToDate(cycle.start_date, notifCycleDay - 1);
+      const label = daysUntil === 1 ? "1 day" : `${daysUntil} days`;
+      const title = `\uD83E\uDE78 ${label} until the Period`;
+
+      const id = await scheduleForDate(Notifications, notifDate, now, title);
+      if (id) ids.push(id);
     }
 
     return ids;
   } catch {
-    // Notifications not supported in Expo Go since SDK 53
     return [];
   }
 }
 
+async function scheduleForDate(
+  Notifications: NonNullable<typeof import("expo-notifications")>,
+  notifDate: Date,
+  now: Date,
+  title: string,
+): Promise<string | null> {
+  // Set target time to 07:30
+  const at0730 = new Date(notifDate);
+  at0730.setHours(7, 30, 0, 0);
+
+  if (at0730 > now) {
+    // Future: schedule at 07:30
+    return Notifications.scheduleNotificationAsync({
+      content: { title, body: "" },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: at0730,
+      },
+    });
+  } else if (isSameDay(notifDate, now)) {
+    // Today but past 07:30: fire in 2 seconds
+    return Notifications.scheduleNotificationAsync({
+      content: { title, body: "" },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: 2,
+      },
+    });
+  }
+
+  // Past day: skip
+  return null;
+}
+
 export async function cancelAllNotifications(): Promise<void> {
+  if (!Notifications) return;
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch {
-    // Notifications not supported in Expo Go since SDK 53
+    // Notifications not available
   }
 }
