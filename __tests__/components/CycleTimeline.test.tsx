@@ -17,14 +17,14 @@ const makePhaseInfo = (
 describe("CycleTimeline", () => {
   it("renders all phase labels", () => {
     render(<CycleTimeline phaseInfo={makePhaseInfo()} />);
-    expect(screen.getByText("Menstrual")).toBeTruthy();
-    expect(screen.getByText("Follicular")).toBeTruthy();
-    expect(screen.getByText("Luteal")).toBeTruthy();
-    expect(screen.getByText("PMS")).toBeTruthy();
+    expect(screen.getByText(/Menstrual/)).toBeTruthy();
+    expect(screen.getByText(/Follicular/)).toBeTruthy();
+    expect(screen.getByText(/Luteal/)).toBeTruthy();
+    expect(screen.getByText(/PMS/)).toBeTruthy();
   });
 
   it("renders with different active phase", () => {
     render(<CycleTimeline phaseInfo={makePhaseInfo(CyclePhase.Luteal)} />);
-    expect(screen.getByText("Luteal")).toBeTruthy();
+    expect(screen.getByText(/Luteal/)).toBeTruthy();
   });
 });

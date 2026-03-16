@@ -5,7 +5,6 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
-  Alert,
   StyleSheet,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -25,11 +24,20 @@ import {
 } from "../../src/constants/theme";
 
 export default function HistoryScreen() {
-  const { cycles, moodLogs, updateCycle, deleteCycle } = useCycle();
+  const { cycles, moodLogs, updateCycle, deleteCycle, addCycle, settings } =
+    useCycle();
   const [editingCycle, setEditingCycle] = useState<Cycle | null>(null);
   const [editStartDate, setEditStartDate] = useState("");
   const [editCycleLength, setEditCycleLength] = useState(28);
   const [editNotes, setEditNotes] = useState("");
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newStartDate, setNewStartDate] = useState(new Date());
+  const [newCycleLength, setNewCycleLength] = useState(
+    settings.default_cycle_length,
+  );
+  const [newNotes, setNewNotes] = useState("");
+  const [addConfirmation, setAddConfirmation] = useState(false);
 
   const handleEdit = (cycle: Cycle) => {
     setEditingCycle(cycle);
@@ -54,14 +62,23 @@ export default function HistoryScreen() {
   };
 
   const handleDelete = (id: number) => {
-    Alert.alert("Delete Cycle", "Are you sure you want to delete this cycle?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => deleteCycle(id),
-      },
-    ]);
+    setDeletingId(id);
+  };
+
+  const handleConfirmDelete = async (id: number) => {
+    await deleteCycle(id);
+    setDeletingId(null);
+  };
+
+  const handleAddCycle = async () => {
+    await addCycle(
+      toISODate(newStartDate),
+      newCycleLength,
+      newNotes || undefined,
+    );
+    setNewNotes("");
+    setAddConfirmation(true);
+    setTimeout(() => setAddConfirmation(false), 2000);
   };
 
   if (cycles.length === 0) {
@@ -105,7 +122,7 @@ export default function HistoryScreen() {
                     <TouchableOpacity
                       style={[styles.stepperButton, SHADOWS.sm]}
                       onPress={() =>
-                        setEditCycleLength(Math.max(21, editCycleLength - 1))
+                        setEditCycleLength(Math.max(1, editCycleLength - 1))
                       }
                     >
                       <Text style={styles.stepperText}>-</Text>
@@ -150,18 +167,126 @@ export default function HistoryScreen() {
           }
 
           return (
-            <CycleHistoryItem
-              cycle={item}
-              moodTrend={trend}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <View>
+              <CycleHistoryItem
+                cycle={item}
+                moodTrend={trend}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+              {deletingId === item.id && (
+                <View style={styles.deleteConfirm}>
+                  <Text style={styles.deleteConfirmText}>
+                    Delete this cycle?
+                  </Text>
+                  <View style={styles.deleteConfirmActions}>
+                    <TouchableOpacity
+                      onPress={() => setDeletingId(null)}
+                      style={styles.cancelButton}
+                    >
+                      <Text style={styles.cancelText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleConfirmDelete(item.id)}
+                    >
+                      <LinearGradient
+                        colors={[...GRADIENTS.buttonDanger]}
+                        style={styles.deleteButton}
+                      >
+                        <Text style={styles.deleteButtonText}>Delete</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
           );
         }}
         ListHeaderComponent={
-          <Text style={styles.header}>
-            {cycles.length} cycle{cycles.length !== 1 ? "s" : ""} recorded
-          </Text>
+          <View>
+            <Text style={styles.header}>
+              {cycles.length} cycle{cycles.length !== 1 ? "s" : ""} recorded
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowAddForm(!showAddForm)}
+              style={{ marginBottom: SPACING.md }}
+            >
+              <LinearGradient
+                colors={[...GRADIENTS.buttonPrimary]}
+                style={styles.addToggleButton}
+              >
+                <Text style={styles.addToggleText}>
+                  {showAddForm ? "Cancel" : "Add New Cycle"}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            {showAddForm && (
+              <View
+                style={[
+                  styles.editCard,
+                  SHADOWS.md,
+                  { marginBottom: SPACING.md },
+                ]}
+              >
+                <Text style={styles.editTitle}>New Cycle</Text>
+                <DatePickerInput
+                  value={newStartDate}
+                  onChange={setNewStartDate}
+                  label="Start Date"
+                  maximumDate={new Date()}
+                />
+                <View style={styles.editRow}>
+                  <Text style={styles.editLabel}>Cycle length</Text>
+                  <View style={styles.stepper}>
+                    <TouchableOpacity
+                      style={[styles.stepperButton, SHADOWS.sm]}
+                      onPress={() =>
+                        setNewCycleLength(Math.max(1, newCycleLength - 1))
+                      }
+                    >
+                      <Text style={styles.stepperText}>-</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.stepperValue}>{newCycleLength}</Text>
+                    <TouchableOpacity
+                      style={[styles.stepperButton, SHADOWS.sm]}
+                      onPress={() =>
+                        setNewCycleLength(Math.min(45, newCycleLength + 1))
+                      }
+                    >
+                      <Text style={styles.stepperText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <TextInput
+                  style={styles.notesInput}
+                  value={newNotes}
+                  onChangeText={setNewNotes}
+                  placeholder="Notes (optional)"
+                  placeholderTextColor={COLORS.textSecondary}
+                  multiline
+                />
+                <View style={styles.editActions}>
+                  <TouchableOpacity
+                    onPress={() => setShowAddForm(false)}
+                    style={styles.cancelButton}
+                  >
+                    <Text style={styles.cancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleAddCycle}>
+                    <LinearGradient
+                      colors={[...GRADIENTS.buttonPrimary]}
+                      style={styles.saveButton}
+                    >
+                      <Text style={styles.saveText}>Submit</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+                {addConfirmation && (
+                  <Text style={styles.confirmText}>Logged!</Text>
+                )}
+              </View>
+            )}
+          </View>
         }
       />
     </LinearGradient>
@@ -276,5 +401,51 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: FONT_SIZES.md,
     fontWeight: "bold",
+  },
+  deleteConfirm: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.sm,
+    padding: SPACING.sm,
+    marginBottom: SPACING.sm,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  deleteConfirmText: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  deleteConfirmActions: {
+    flexDirection: "row",
+    gap: SPACING.sm,
+    alignItems: "center",
+  },
+  deleteButton: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  deleteButtonText: {
+    color: "#FFFFFF",
+    fontSize: FONT_SIZES.sm,
+    fontWeight: "bold",
+  },
+  addToggleButton: {
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: "center",
+  },
+  addToggleText: {
+    color: "#FFFFFF",
+    fontSize: FONT_SIZES.md,
+    fontWeight: "bold",
+  },
+  confirmText: {
+    textAlign: "center",
+    color: COLORS.success,
+    fontWeight: "bold",
+    marginTop: SPACING.sm,
+    fontSize: FONT_SIZES.md,
   },
 });

@@ -10,7 +10,6 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useCycle } from "../../src/context/CycleContext";
 import { MoodInput } from "../../src/components/MoodInput";
-import { DatePickerInput } from "../../src/components/DatePickerInput";
 import { toISODate, todayISO } from "../../src/utils/dateUtils";
 import {
   COLORS,
@@ -22,11 +21,7 @@ import {
 } from "../../src/constants/theme";
 
 export default function LogScreen() {
-  const { addCycle, logMood, settings, moodLogs } = useCycle();
-
-  // Bleeding log state
-  const [bleedingDate, setBleedingDate] = useState(new Date());
-  const [bleedingNotes, setBleedingNotes] = useState("");
+  const { logMood, moodLogs } = useCycle();
 
   // Mood log state
   const [moodDate] = useState(new Date());
@@ -42,20 +37,6 @@ export default function LogScreen() {
       setMoodNotes(todayMood.notes ?? "");
     }
   }, [todayMood]);
-
-  const handleLogBleeding = async () => {
-    try {
-      await addCycle(
-        toISODate(bleedingDate),
-        settings.default_cycle_length,
-        bleedingNotes || undefined,
-      );
-      setBleedingNotes("");
-      Alert.alert("Logged!", "New period start date recorded.");
-    } catch {
-      Alert.alert("Error", "Could not log bleeding. Date may already exist.");
-    }
-  };
 
   const handleLogMood = async () => {
     if (moodScore === null) {
@@ -76,47 +57,6 @@ export default function LogScreen() {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Bleeding Section */}
-        <LinearGradient
-          colors={[...GRADIENTS.warmCard]}
-          style={[styles.section, SHADOWS.md]}
-        >
-          <Text style={styles.sectionTitle}>Log New Period</Text>
-          <Text style={styles.sectionSubtitle}>
-            Record when bleeding started
-          </Text>
-
-          <DatePickerInput
-            label="Period start date"
-            value={bleedingDate}
-            onChange={setBleedingDate}
-            maximumDate={new Date()}
-          />
-
-          <TextInput
-            style={styles.notesInput}
-            placeholder="Notes (optional)"
-            value={bleedingNotes}
-            onChangeText={setBleedingNotes}
-            multiline
-            maxLength={500}
-            placeholderTextColor={COLORS.textSecondary}
-          />
-
-          <TouchableOpacity
-            onPress={handleLogBleeding}
-            accessibilityRole="button"
-            accessibilityLabel="Log period start"
-          >
-            <LinearGradient
-              colors={[...GRADIENTS.buttonDanger]}
-              style={[styles.logButton, SHADOWS.glow("#D94A4A")]}
-            >
-              <Text style={styles.logButtonText}>Log Period Start</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </LinearGradient>
-
         {/* Mood Section */}
         <LinearGradient
           colors={[...GRADIENTS.warmCard]}

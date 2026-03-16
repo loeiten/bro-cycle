@@ -43,6 +43,34 @@ jest.mock("expo-router", () => ({
   },
 }));
 
+// Mock expo-router/drawer
+jest.mock("expo-router/drawer", () => {
+  const Drawer = (props: { children?: React.ReactNode }) => props.children;
+  Drawer.Screen = "Screen";
+  return { Drawer };
+});
+
+// Mock react-native-reanimated
+jest.mock("react-native-reanimated", () => {
+  return {
+    __esModule: true,
+    default: { createAnimatedComponent: (c: unknown) => c },
+    useSharedValue: jest.fn((v: unknown) => ({ value: v })),
+    useAnimatedStyle: jest.fn(() => ({})),
+    withTiming: jest.fn((v: unknown) => v),
+    withSpring: jest.fn((v: unknown) => v),
+    FadeIn: { duration: jest.fn().mockReturnThis() },
+    FadeOut: { duration: jest.fn().mockReturnThis() },
+    Layout: { duration: jest.fn().mockReturnThis() },
+    createAnimatedComponent: (c: unknown) => c,
+  };
+});
+
+// Mock @react-navigation/drawer
+jest.mock("@react-navigation/drawer", () => ({
+  createDrawerNavigator: jest.fn(),
+}));
+
 // Silence console.error and console.warn in tests
 const originalError = console.error;
 const originalWarn = console.warn;

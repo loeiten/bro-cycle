@@ -171,14 +171,14 @@ describe("predictionEngine", () => {
         makeCycle("2024-03-25", 28, 4),
       ];
       const result = predictCycleLength(cycles);
-      expect(result.predicted).toBeGreaterThanOrEqual(21);
+      expect(result.predicted).toBeGreaterThanOrEqual(1);
       expect(result.distribution.length).toBeGreaterThan(0);
       // Distribution should sum to ~1
       const total = result.distribution.reduce((s, d) => s + d.probability, 0);
       expect(total).toBeCloseTo(1, 1);
     });
 
-    it("predicted length is at least 21", () => {
+    it("predicted length can be below 21 for short cycles", () => {
       // Create cycles with decreasing lengths to push prediction low
       const cycles = [
         makeCycle("2024-01-01", 28, 1),
@@ -186,7 +186,19 @@ describe("predictionEngine", () => {
         makeCycle("2024-02-05", 28, 3), // 16 days
       ];
       const result = predictCycleLength(cycles);
-      expect(result.predicted).toBeGreaterThanOrEqual(21);
+      expect(result.predicted).toBeGreaterThanOrEqual(1);
+      expect(result.predicted).toBeLessThan(21);
+    });
+
+    it("distribution has at least 8 bars even with small stdDev", () => {
+      // Two cycles with identical spacing → stdDev = 1 (minimum)
+      const cycles = [
+        makeCycle("2024-01-01", 28, 1),
+        makeCycle("2024-01-29", 28, 2),
+        makeCycle("2024-02-26", 28, 3),
+      ];
+      const result = predictCycleLength(cycles);
+      expect(result.distribution.length).toBeGreaterThanOrEqual(8);
     });
   });
 

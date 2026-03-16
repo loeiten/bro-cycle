@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
+  Animated,
   StyleSheet,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -26,6 +26,8 @@ import {
 export default function HomeScreen() {
   const { currentCycle, currentPhase, prediction, addCycle, settings } =
     useCycle();
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   if (!currentCycle || !currentPhase) {
     return (
@@ -39,9 +41,24 @@ export default function HomeScreen() {
   const phaseColor = PHASE_COLORS[currentPhase.phase];
   const definition = PHASE_DEFINITIONS[currentPhase.phase];
 
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.9,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
   const handleNewBleeding = async () => {
     await addCycle(todayISO(), settings.default_cycle_length);
-    Alert.alert("Logged!", "New period start date recorded.");
+    setShowConfirmation(true);
+    setTimeout(() => setShowConfirmation(false), 2000);
   };
 
   return (
@@ -57,7 +74,7 @@ export default function HomeScreen() {
           />
         )}
 
-        {/* Hero: day number, phase info, timeline */}
+        {/* Hero: day number, phase info, progress bar, timeline */}
         <LinearGradient
           colors={[...GRADIENTS.phaseHero[currentPhase.phase]]}
           style={[styles.heroSection, SHADOWS.md]}
@@ -83,20 +100,28 @@ export default function HomeScreen() {
         </LinearGradient>
 
         {/* New Bleeding Started button */}
-        <TouchableOpacity
-          onPress={handleNewBleeding}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel="New Bleeding Started"
+        <Animated.View
+          style={{ transform: [{ scale: scaleAnim }], alignSelf: "center" }}
         >
-          <LinearGradient
-            colors={[...GRADIENTS.buttonDanger]}
-            style={[styles.bleedingButton, SHADOWS.glow("#EF4444")]}
+          <TouchableOpacity
+            onPress={handleNewBleeding}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            accessibilityRole="button"
+            accessibilityLabel="New Bleeding Started"
           >
-            <Text style={styles.bleedingEmoji}>{"\uD83E\uDE78"}</Text>
-            <Text style={styles.bleedingText}>New Bleeding Started</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+            <LinearGradient
+              colors={[...GRADIENTS.buttonDanger]}
+              style={[styles.bleedingButton, SHADOWS.glow("#EF4444")]}
+            >
+              <Text style={styles.bleedingEmoji}>{"\uD83E\uDE78"}</Text>
+              <Text style={styles.bleedingText}>New Bleeding</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </Animated.View>
+        {showConfirmation && (
+          <Text style={styles.confirmText}>Logged! New period recorded.</Text>
+        )}
 
         {/* Prediction chart */}
         {prediction && prediction.distribution.length > 0 && (
@@ -131,7 +156,8 @@ export default function HomeScreen() {
                         },
                       ]}
                     />
-                    {dp.day % 2 === 0 && (
+                    {(prediction.distribution.length <= 10 ||
+                      dp.day % 2 === 0) && (
                       <Text style={styles.barLabel}>{dp.day}</Text>
                     )}
                   </View>
@@ -206,19 +232,27 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   bleedingButton: {
-    borderRadius: BORDER_RADIUS.xl,
-    paddingVertical: SPACING.lg,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     alignItems: "center",
-    marginBottom: SPACING.md,
+    justifyContent: "center",
   },
   bleedingEmoji: {
-    fontSize: 40,
+    fontSize: 32,
     marginBottom: SPACING.xs,
   },
   bleedingText: {
     color: "#FFFFFF",
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.sm,
     fontWeight: "bold",
+  },
+  confirmText: {
+    textAlign: "center",
+    color: COLORS.success,
+    fontWeight: "bold",
+    marginTop: SPACING.sm,
+    fontSize: FONT_SIZES.md,
   },
   predictionCard: {
     borderRadius: BORDER_RADIUS.lg,
@@ -244,6 +278,7 @@ const styles = StyleSheet.create({
   },
   barContainer: {
     flex: 1,
+    maxWidth: 40,
     alignItems: "center",
     justifyContent: "flex-end",
     height: "100%",

@@ -115,7 +115,7 @@ export function MoodInput({ value, onSelect }: Props) {
       {MOOD_TIERS.map((tier) => (
         <View key={tier.score} style={styles.tierRow}>
           <Text style={styles.tierLabel}>
-            {tier.score} \u2014 {tier.label}
+            {tier.score} {"\u2014"} {tier.label}
           </Text>
           <ScrollView
             horizontal

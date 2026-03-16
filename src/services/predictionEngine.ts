@@ -127,16 +127,24 @@ export function predictCycleLength(cycles: Cycle[]): CyclePrediction {
   const stdDev = Math.max(Math.sqrt(variance), 1);
 
   return {
-    predicted: Math.max(predicted, 21),
+    predicted: Math.max(predicted, 1),
     stdDev,
-    distribution: buildDistribution(Math.max(predicted, 21), stdDev),
+    distribution: buildDistribution(Math.max(predicted, 1), stdDev),
   };
 }
 
 function buildDistribution(mean: number, stdDev: number): DayProbability[] {
   const distribution: DayProbability[] = [];
-  const rangeStart = Math.max(Math.floor(mean - 3 * stdDev), 21);
-  const rangeEnd = Math.ceil(mean + 3 * stdDev);
+  let rangeStart = Math.max(Math.floor(mean - 3 * stdDev), 1);
+  let rangeEnd = Math.ceil(mean + 3 * stdDev);
+
+  const minRange = 8;
+  if (rangeEnd - rangeStart + 1 < minRange) {
+    const deficit = minRange - (rangeEnd - rangeStart + 1);
+    const expandLeft = Math.floor(deficit / 2);
+    rangeStart = Math.max(rangeStart - expandLeft, 1);
+    rangeEnd = rangeStart + minRange - 1;
+  }
 
   let totalProb = 0;
   for (let day = rangeStart; day <= rangeEnd; day++) {
