@@ -10,7 +10,7 @@ mood changes, and providing educational insights.
 - **Phase display** - Visual vertical timeline showing current phase and position
 - **Mood logging** - Record daily mood (1-5 scale) with optional notes
 - **Adaptive prediction** - Linear regression on cycle lengths with probability distributions
-- **Phase warnings** - Local notifications before luteal and PMS phases
+- **Phase warnings** - Daily push notifications at 07:30 before each phase (Follicular, Luteal, PMS, Period)
 - **Educational insights** - Partner-focused tips for each phase
 - **Cycle history** - View past cycles with mood overlay
 
@@ -30,18 +30,39 @@ All data is stored locally on your device using SQLite. Nothing is ever sent to 
 ### Prerequisites
 
 - Node.js 18+
-- Expo Go app on your phone (iOS App Store / Google Play Store)
+- JDK 17 (for Android builds): `brew install temurin@17`
+- Android SDK (for Android builds): `brew install android-commandlinetools`
 
-### Install & Run
+### Install & Run (Expo Go)
 
 ```bash
 npm install
 npx expo start
 ```
 
-Scan the QR code with your phone camera (iOS) or Expo Go app (Android).
+Scan the QR code with Expo Go on your phone. Note: push notifications do not work in Expo Go (Android) since SDK 53.
 
-### Development
+### Development Build (recommended for full features)
+
+A development build compiles native code so all features (including push notifications) work:
+
+```bash
+JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home \
+ANDROID_HOME=/opt/homebrew/share/android-commandlinetools \
+npx expo run:android
+```
+
+To install on a physical phone, connect via USB with USB debugging enabled, then:
+
+```bash
+JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home \
+ANDROID_HOME=/opt/homebrew/share/android-commandlinetools \
+npx expo run:android --device
+```
+
+Or transfer `android/app/build/outputs/apk/debug/app-debug.apk` to your phone manually.
+
+### Tests & Checks
 
 ```bash
 npm test                # Run tests
@@ -53,9 +74,9 @@ npm run typecheck       # TypeScript check
 
 ## Tech Stack
 
-- React Native + Expo SDK 55
+- React Native + Expo SDK 54
 - TypeScript
-- expo-router v4 (file-based routing)
+- expo-router v6 (file-based routing)
 - expo-sqlite (local database)
 - date-fns (date math)
 - Jest + React Native Testing Library
