@@ -24,6 +24,15 @@ export async function insertCycle(
   notes?: string,
 ): Promise<Cycle> {
   const db = await getDatabase();
+  // Check if a cycle with this start_date already exists (UNIQUE constraint)
+  const existing = await db.getFirstAsync<Cycle>(
+    "SELECT * FROM cycles WHERE start_date = ?",
+    [startDate],
+  );
+  if (existing) {
+    return existing;
+  }
+
   const result = await db.runAsync(
     "INSERT INTO cycles (start_date, cycle_length, notes) VALUES (?, ?, ?)",
     [startDate, cycleLength, notes ?? null],

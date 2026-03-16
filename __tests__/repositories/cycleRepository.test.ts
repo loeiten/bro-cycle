@@ -77,6 +77,7 @@ describe("cycleRepository", () => {
       mockGetAllAsync.mockResolvedValueOnce([mockCycle]); // getAllCycles
       mockGetFirstAsync
         .mockResolvedValueOnce({ version: 2 }) // schema check
+        .mockResolvedValueOnce(null) // duplicate check (no existing cycle)
         .mockResolvedValueOnce(mockCycle); // getCycleById
       await insertCycle("2024-03-01", 28);
       expect(mockRunAsync).toHaveBeenCalledWith(
