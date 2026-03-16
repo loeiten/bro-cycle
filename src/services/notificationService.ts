@@ -6,7 +6,6 @@ import { getPhaseBoundaries } from "./cycleCalculator";
 try {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldShowAlert: true,
       shouldShowBanner: true,
       shouldShowList: true,
       shouldPlaySound: false,
@@ -29,6 +28,10 @@ export async function schedulePhaseWarnings(
   if (!settings.notifications_enabled) return [];
 
   try {
+    // Ensure we have permission before scheduling
+    const granted = await requestPermissions();
+    if (!granted) return [];
+
     // Cancel existing scheduled notifications
     await Notifications.cancelAllScheduledNotificationsAsync();
 

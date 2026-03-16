@@ -111,8 +111,8 @@ export default function HomeScreen() {
             accessibilityLabel="New Bleeding Started"
           >
             <LinearGradient
-              colors={[...GRADIENTS.buttonDanger]}
-              style={[styles.bleedingButton, SHADOWS.glow("#EF4444")]}
+              colors={["#9F1239", "#881337"] as const}
+              style={[styles.bleedingButton, SHADOWS.glow("#9F1239")]}
             >
               <Text style={styles.bleedingEmoji}>{"\uD83E\uDE78"}</Text>
               <Text style={styles.bleedingText}>New Bleeding</Text>
