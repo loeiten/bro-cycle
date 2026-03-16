@@ -62,6 +62,18 @@ npx expo run:android --device
 
 Or transfer `android/app/build/outputs/apk/debug/app-debug.apk` to your phone manually.
 
+> **Note:** Development builds do not bundle the JS code into the APK. The app
+> requires a running Metro dev server to load. If you unplug USB and open the app
+> without a server, you'll see a "Development Servers" connection screen.
+>
+> To use the dev build over Wi-Fi (without USB):
+>
+> 1. Ensure your phone and computer are on the same Wi-Fi network
+> 2. Run `npx expo start` on your computer
+> 3. Open the app and enter your computer's local IP (e.g. `http://192.168.x.x:8081`), then tap Connect
+>
+> For a fully standalone app that works offline, use the release build below.
+
 ### Release Build (standalone, no dev server needed)
 
 ```bash
